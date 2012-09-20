@@ -1,0 +1,15 @@
+name: TokenMarket
+version: 1.3
+main: com.ngc0202.tokenmarket.TokenMarket
+author: ngc0202
+depend: [PermissionsEx]
+commands:
+    ctm:
+        description: Starts/Ends market creation process
+        usage: /ctm start
+        permission: TokenMarket.CTM
+        permission-message: You don't have permission to do that.
+
+    tokens:
+        description: Displays/Adds/Sets Token
+        usage: /tokens [add/set] [player] [###]
