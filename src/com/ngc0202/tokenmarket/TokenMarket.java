@@ -44,7 +44,8 @@ public class TokenMarket extends JavaPlugin implements Listener {
     private long startBal = 0;
     private ArrayList<TokenBlock> blocks;
     ArrayList<Data2> endLog;
-    Map<ArrayList<String>, String> joinCmds = new HashMap<ArrayList<String>, String>();
+//    Map<ArrayList<String>, String> joinCmds = new HashMap<ArrayList<String>, String>();
+    ArrayList<Data3> joinCmds = new ArrayList<Data3>();
     private static Map<String, SLocation> active = new HashMap<String, SLocation>();
     private static PermissionManager pex;
 
@@ -288,14 +289,16 @@ public class TokenMarket extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        for (Entry<ArrayList<String>, String> set : joinCmds.entrySet()) {
-            String playerName = set.getValue();
+//        for (Entry<ArrayList<String>, String> set : joinCmds.entrySet()) {
+        for (int i = 0; i < joinCmds.size(); i++) {
+            String playerName = joinCmds.get(i).getPly();
             if (playerName.equalsIgnoreCase(event.getPlayer().getName())) {
-                ArrayList<String> cmds = set.getKey();
+                ArrayList<String> cmds = joinCmds.get(i).getCmds();
                 for (String cmd : cmds) {
                     getServer().dispatchCommand(getServer().getConsoleSender(), cmd);
                 }
-                joinCmds.remove(set.getKey());
+                joinCmds.remove(i);
+                i--;
             }
         }
     }
@@ -388,18 +391,16 @@ public class TokenMarket extends JavaPlugin implements Listener {
         }
     }
 
-    private Map<ArrayList<String>, String> readJoins() {
+    private ArrayList<Data3> readJoins() {
         ObjectInputStream istream = null;
         try {
             istream = new ObjectInputStream(new FileInputStream(joinsFile));
-            Map<ArrayList<String>, String> toReturn = (Map<ArrayList<String>, String>) istream.readObject();
+            ArrayList<Data3> toReturn = (ArrayList<Data3>) istream.readObject();
             if (toReturn != null) {
                 return toReturn;
             } else {
-                return new HashMap<ArrayList<String>, String>();
+                return new ArrayList<Data3>();
             }
-        } catch (ClassNotFoundException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             getLogger().log(Level.SEVERE, null, ex);
         } finally {
@@ -411,7 +412,7 @@ public class TokenMarket extends JavaPlugin implements Listener {
                 Logger.getLogger(TokenMarket.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        return new HashMap<ArrayList<String>, String>();
+        return new ArrayList<Data3>();
     }
 
     private void saveJoins() {
@@ -477,14 +478,16 @@ public class TokenMarket extends JavaPlugin implements Listener {
         } catch (Exception ex) {
             getLogger().log(Level.SEVERE, null, ex);
         }
-        for(Entry<String, String> ent : toks.entrySet()){
+        for (Entry<String, String> ent : toks.entrySet()) {
             String name = ent.getKey();
             long ptok = Long.parseLong(ent.getValue());
 
-            if(!tokens.keyExists(name))
+            if (!tokens.keyExists(name)) {
                 continue;
-            if(name.equals(name.toLowerCase()))
+            }
+            if (name.equals(name.toLowerCase())) {
                 continue;
+            }
             tokens.removeKey(name);
             tokens.setLong(name.toLowerCase(), ptok);
         }

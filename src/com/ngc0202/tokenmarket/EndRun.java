@@ -26,7 +26,7 @@ class EndRun implements Runnable {
 
     public void run() {
         if (!getPlugin().getServer().getOfflinePlayer(ply).isOnline()) {
-            getPlugin().joinCmds.put(cmds, ply);
+            getPlugin().joinCmds.add(new Data3(ply, cmds));
             return;
         }
         for (String cmd : cmds) {
