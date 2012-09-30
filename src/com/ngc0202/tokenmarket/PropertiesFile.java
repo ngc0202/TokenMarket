@@ -1,12 +1,7 @@
 package com.ngc0202.tokenmarket;
 
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -33,7 +28,7 @@ import java.util.logging.Logger;
 
 /**
  * iProperty
- *
+ * <p/>
  * Reads & Writes properties files.
  *
  * @author Nijiko
@@ -45,168 +40,169 @@ public final class PropertiesFile {
     private String fileName;
 
     public PropertiesFile(String fileName) {
-	this.fileName = fileName;
-	this.properties = new Properties();
-	File file = new File(fileName);
+        this.fileName = fileName;
+        this.properties = new Properties();
+        File file = new File(fileName);
 
-	if (file.exists()) {
-	    load();
-	} else {
-	    save();
-	}
+        if (file.exists()) {
+            load();
+        } else {
+            save();
+        }
     }
 
     public void load() {
-	try {
-	    this.properties.load(new FileInputStream(this.fileName));
-	} catch (IOException ex) {
-	    log.log(Level.SEVERE, "Unable to load " + this.fileName, ex);
-	}
+        try {
+            this.properties.load(new FileInputStream(this.fileName));
+        } catch (IOException ex) {
+            log.log(Level.SEVERE, "Unable to load " + this.fileName, ex);
+        }
     }
 
     public void save() {
-	try {
-	    this.properties.store(new FileOutputStream(this.fileName), "Minecraft Properties File");
-	} catch (IOException ex) {
-	    log.log(Level.SEVERE, "Unable to save " + this.fileName, ex);
-	}
+        try {
+            this.properties.store(new FileOutputStream(this.fileName), "Minecraft Properties File");
+        } catch (IOException ex) {
+            log.log(Level.SEVERE, "Unable to save " + this.fileName, ex);
+        }
     }
 
-    public Map<String, String> returnMap() throws Exception {
-	Map<String, String> map = new HashMap();
-	BufferedReader reader = new BufferedReader(new FileReader(this.fileName));
-	String line;
-	while ((line = reader.readLine()) != null) {
-	    if (line.trim().length() == 0) {
-		continue;
-	    }
-	    if (line.charAt(0) == '#') {
-		continue;
-	    }
-	    int delimPosition = line.indexOf('=');
-	    String key = line.substring(0, delimPosition).trim();
-	    String value = line.substring(delimPosition + 1).trim();
-	    map.put(key, value);
-	}
-	reader.close();
-	return map;
+    public Map<String, String> returnMap() throws IOException {
+        Map<String, String> map = new HashMap<String, String>();
+        BufferedReader reader = new BufferedReader(new FileReader(this.fileName));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            line = line.trim();
+            if (line.length() == 0) {
+                continue;
+            }
+            if (line.charAt(0) == '#') {
+                continue;
+            }
+            int delimPosition = line.indexOf('=');
+            String key = line.substring(0, delimPosition).trim();
+            String value = line.substring(delimPosition + 1).trim();
+            map.put(key, value);
+        }
+        reader.close();
+        return map;
     }
 
     public void removeKey(String key) {
-	this.properties.remove(key);
-	save();
+        this.properties.remove(key);
+        save();
     }
 
     public boolean keyExists(String key) {
-	return this.properties.containsKey(key);
+        return this.properties.containsKey(key);
     }
 
     public String getString(String key) {
-	if (this.properties.containsKey(key)) {
-	    return this.properties.getProperty(key);
-	}
+        if (this.properties.containsKey(key)) {
+            return this.properties.getProperty(key);
+        }
 
-	return "";
+        return "";
     }
 
     public String getString(String key, String value) {
-	if (this.properties.containsKey(key)) {
-	    return this.properties.getProperty(key);
-	}
-	setString(key, value);
-	return value;
+        if (this.properties.containsKey(key)) {
+            return this.properties.getProperty(key);
+        }
+        setString(key, value);
+        return value;
     }
 
     public void setString(String key, String value) {
-	this.properties.setProperty(key, value);
-	save();
+        this.properties.setProperty(key, value);
+        save();
     }
 
     public int getInt(String key) {
-	if (this.properties.containsKey(key)) {
-	    return Integer.parseInt(this.properties.getProperty(key));
-	}
+        if (this.properties.containsKey(key)) {
+            return Integer.parseInt(this.properties.getProperty(key));
+        }
 
-	return 0;
+        return 0;
     }
 
     public int getInt(String key, int value) {
-	if (this.properties.containsKey(key)) {
-	    return Integer.parseInt(this.properties.getProperty(key));
-	}
+        if (this.properties.containsKey(key)) {
+            return Integer.parseInt(this.properties.getProperty(key));
+        }
 
-	setInt(key, value);
-	return value;
+        setInt(key, value);
+        return value;
     }
 
     public void setInt(String key, int value) {
-	this.properties.setProperty(key, String.valueOf(value));
-	save();
+        this.properties.setProperty(key, String.valueOf(value));
+        save();
     }
 
     public double getDouble(String key) {
-	if (this.properties.containsKey(key)) {
-	    return Double.parseDouble(this.properties.getProperty(key));
-	}
+        if (this.properties.containsKey(key)) {
+            return Double.parseDouble(this.properties.getProperty(key));
+        }
 
-	return 0;
+        return 0;
     }
 
     public double getDouble(String key, double value) {
-	if (this.properties.containsKey(key)) {
-	    return Double.parseDouble(this.properties.getProperty(key));
-	}
+        if (this.properties.containsKey(key)) {
+            return Double.parseDouble(this.properties.getProperty(key));
+        }
 
-	setDouble(key, value);
-	return value;
+        setDouble(key, value);
+        return value;
     }
 
     public void setDouble(String key, double value) {
-	this.properties.setProperty(key, String.valueOf(value));
-	save();
+        this.properties.setProperty(key, String.valueOf(value));
+        save();
     }
 
     public long getLong(String key) {
-	if (this.properties.containsKey(key)) {
-	    return Long.parseLong(this.properties.getProperty(key));
-	}
+        if (this.properties.containsKey(key)) {
+            return Long.parseLong(this.properties.getProperty(key));
+        }
 
-	return 0;
+        return 0;
     }
 
     public long getLong(String key, long value) {
-	if (this.properties.containsKey(key)) {
-	    return Long.parseLong(this.properties.getProperty(key));
-	}
+        if (this.properties.containsKey(key)) {
+            return Long.parseLong(this.properties.getProperty(key));
+        }
 
-	setLong(key, value);
-	return value;
+        setLong(key, value);
+        return value;
     }
 
     public void setLong(String key, long value) {
-	this.properties.setProperty(key, String.valueOf(value));
-	save();
+        this.properties.setProperty(key, String.valueOf(value));
+        save();
     }
 
     public boolean getBoolean(String key) {
-	if (this.properties.containsKey(key)) {
-	    return Boolean.parseBoolean(this.properties.getProperty(key));
-	}
+        if (this.properties.containsKey(key)) {
+            return Boolean.parseBoolean(this.properties.getProperty(key));
+        }
 
-	return false;
+        return false;
     }
 
     public boolean getBoolean(String key, boolean value) {
-	if (this.properties.containsKey(key)) {
-	    return Boolean.parseBoolean(this.properties.getProperty(key));
-	}
+        if (this.properties.containsKey(key)) {
+            return Boolean.parseBoolean(this.properties.getProperty(key));
+        }
 
-	setBoolean(key, value);
-	return value;
+        setBoolean(key, value);
+        return value;
     }
 
     public void setBoolean(String key, boolean value) {
-	this.properties.setProperty(key, String.valueOf(value));
-	save();
+        this.properties.setProperty(key, String.valueOf(value));
+        save();
     }
 }

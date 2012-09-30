@@ -1,50 +1,40 @@
 package com.ngc0202.tokenmarket;
 
-import java.util.ArrayList;
+import java.util.Collection;
 
 /**
- *
  * @author ngc0202
  */
 class EndRun implements Runnable {
 
+    private final TokenMarket plugin;
     private final String ply;
-    private final ArrayList<String> cmds;
-    private Data2 data;
+    private final Collection<String> cmds;
+    private PlayerCommandTimer data;
 
-    public EndRun(String ply, ArrayList<String> cmds) {
+    public EndRun(TokenMarket plugin, String ply, Collection<String> cmds) {
+        this.plugin = plugin;
         this.ply = ply;
         this.cmds = cmds;
-        this.data = getData(ply, cmds);
+        this.data = plugin.getCommandTimer(ply, cmds);
     }
 
-    public EndRun(Data2 data) {
+    public EndRun(TokenMarket plugin, PlayerCommandTimer data) {
+        this.plugin = plugin;
         this.data = data;
         ply = data.getPlayerName();
         cmds = data.getCommands();
     }
 
+    @Override
     public void run() {
-        if (!getPlugin().getServer().getOfflinePlayer(ply).isOnline()) {
-            getPlugin().joinCmds.add(new Data3(ply, cmds));
-            return;
-        }
-        for (String cmd : cmds) {
-            getPlugin().getServer().dispatchCommand(getPlugin().getServer().getConsoleSender(), cmd);
-        }
-        getPlugin().endLog.remove(data);
-    }
-
-    private static TokenMarket getPlugin() {
-        return TokenMarket.plugin;
-    }
-
-    private static Data2 getData(String ply, ArrayList<String> cmds) {
-        for (Data2 dat : getPlugin().endLog) {
-            if (ply.equalsIgnoreCase(dat.getPlayerName()) && cmds.equals(dat.getCommands())) {
-                return dat;
+        if (plugin.getServer().getOfflinePlayer(ply).isOnline()) {
+            for (String cmd : cmds) {
+                plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), cmd);
             }
+            plugin.removeCommandTimer(data);
+        } else {
+            plugin.addJoinCommands(new QueuedCommands(ply, cmds));
         }
-        return null;
     }
 }
