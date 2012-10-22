@@ -26,7 +26,7 @@ public class TokenMarket extends JavaPlugin implements Listener {
     private PropertiesFile tokens;
     private long startBal = 0;
     private Map<SLocation, TokenBlock> blocks;
-    private Map<String, PlayerCommandTimer> commandTimers;
+    private Map<PlayerCommandType, PlayerCommandTimer> commandTimers;
     private Map<String, QueuedCommands> joinCmds;
     private Map<String, SLocation> creatingMarket = new HashMap<String, SLocation>();
 
@@ -63,9 +63,9 @@ public class TokenMarket extends JavaPlugin implements Listener {
             blocks.put(b.getSLocation(), b);
         }
         List<PlayerCommandTimer> commandTimerList = readCollectionFromFile(endLogFile, PlayerCommandTimer.MyFactory.instance);
-        commandTimers = new HashMap<String, PlayerCommandTimer>();
+        commandTimers = new HashMap<PlayerCommandType, PlayerCommandTimer>();
         for (PlayerCommandTimer t : commandTimerList) {
-            commandTimers.put(t.getPlayerName().toLowerCase(), t);
+            addCommandTimer(t);
         }
         List<QueuedCommands> cmds = readCollectionFromFile(joinsFile, QueuedCommands.MyFactory.instance);
         joinCmds = new HashMap<String, QueuedCommands>();
@@ -284,7 +284,7 @@ public class TokenMarket extends JavaPlugin implements Listener {
     }
 
     public PlayerCommandTimer getCommandTimer(String ply, Collection<String> cmds) {
-        return commandTimers.get(ply.toLowerCase());
+        return commandTimers.get(new PlayerCommandType(ply, cmds));
     }
 
     public long getTokens(String ply) {
@@ -303,11 +303,11 @@ public class TokenMarket extends JavaPlugin implements Listener {
     }
 
     public void addCommandTimer(PlayerCommandTimer timer) {
-        commandTimers.put(timer.getPlayerName().toLowerCase(), timer);
+        commandTimers.put(new PlayerCommandType(timer.getPlayerName(), timer.getCommands()), timer);
     }
 
     public void removeCommandTimer(PlayerCommandTimer timer) {
-        commandTimers.remove(timer.getPlayerName().toLowerCase());
+        commandTimers.remove(new PlayerCommandType(timer.getPlayerName(), timer.getCommands()));
     }
 
     public void addJoinCommands(QueuedCommands cmds) {
@@ -329,5 +329,33 @@ public class TokenMarket extends JavaPlugin implements Listener {
 
     public TokenBlock getBlockAt(SLocation location) {
         return blocks.get(location);
+    }
+
+    private static class PlayerCommandType {
+        String name;
+        String[] cmds;
+
+        PlayerCommandType(String playerName, Collection<String> cmds) {
+            this.name = playerName.toLowerCase();
+            this.cmds = cmds.toArray(new String[cmds.size()]);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            PlayerCommandType that = (PlayerCommandType) o;
+
+            return Arrays.equals(cmds, that.cmds) && name.equals(that.name);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = name.hashCode();
+            result = 31 * result + Arrays.hashCode(cmds);
+            return result;
+        }
     }
 }
